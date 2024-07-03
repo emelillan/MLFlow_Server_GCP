@@ -7,13 +7,13 @@ from datetime import datetime
 
 import mlflow
 from mlflow.models import infer_signature
-
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+
 # Define the tracking URI for the MLflow experiment
-TRACKING_URI = "YOUR-URI-FROM-CLOUD-RUN"
+TRACKING_URI = "https://ml-flow-webapp-szykkzqgka-uc.a.run.app"
 
 # Read the wine-quality dataset from a CSV file
 csv_url = "https://raw.githubusercontent.com/mlflow/mlflow/master/tests/datasets/winequality-red.csv"
@@ -35,7 +35,8 @@ random_state = 42
 max_iter = 1000
 
 # Create an Elastic Net model with the defined hyperparameters
-lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=random_state, max_iter=max_iter)
+lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio,
+                random_state=random_state, max_iter=max_iter)
 
 # Fit the model to the training data
 lr.fit(train_x, train_y)
@@ -44,16 +45,20 @@ lr.fit(train_x, train_y)
 predictions = lr.predict(test_x)
 
 # Evaluate the model's performance
+
+
 def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
     mae = mean_absolute_error(actual, pred)
     r2 = r2_score(actual, pred)
     return rmse, mae, r2
 
+
 (rmse, mae, r2) = eval_metrics(test_y, predictions)
 
 # Print the evaluation metrics
-print(f"Elasticnet model (alpha={alpha:f}, l1_ratio={l1_ratio:f}, random_state={random_state}, max_iter={max_iter}):")
+print(
+    f"Elasticnet model (alpha={alpha:f}, l1_ratio={l1_ratio:f}, random_state={random_state}, max_iter={max_iter}):")
 print(f"RMSE: {rmse}")
 print(f"MAE: {mae}")
 print(f"R2: {r2}")
@@ -81,22 +86,22 @@ tags = {
 
 # Start the MLflow run
 with mlflow.start_run(
-    experiment_id=experiment.experiment_id, 
-    run_name=run_name, 
+    experiment_id=experiment.experiment_id,
+    run_name=run_name,
     tags=tags
 ):
-    
+
     # Log the hyperparameters used in the model
     mlflow.log_param("alpha", alpha)
     mlflow.log_param("l1_ratio", l1_ratio)
     mlflow.log_param("random_state", random_state)
     mlflow.log_param("max_iter", max_iter)
-    
+
     # Log the metrics
     mlflow.log_metric("rmse", rmse)
     mlflow.log_metric("r2", r2)
     mlflow.log_metric("mae", mae)
-    
+
     # Log model:
     signature = infer_signature(train_x, predictions)
     mlflow.sklearn.log_model(lr, "model", signature=signature)

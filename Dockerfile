@@ -6,6 +6,7 @@ COPY requirements.txt requirements.txt
 COPY server.sh server.sh
 
 ENV GOOGLE_APPLICATION_CREDENTIALS='./secrets/credentials'
+ENV MLFLOW_GCS_UPLOAD_CHUNK_SIZE=1048576
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
